@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary and local data folders
+uploads/
+outputs/
+*.pdf
+*.zip
+*.log
+
+# Project memory and agent configs (keep local only)
+learning/
+AGENTS.md
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Virtual environments & secret files
+.env
+.venv/
+env/
+venv/

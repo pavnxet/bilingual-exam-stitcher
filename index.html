@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilingual Exam PDF Splitter & 2-Up Stitcher</title>
+    <meta name="description" content="100% In-Browser bilingual exam PDF splitter and 2-Up booklet stitcher. Cuts Hindi/English columns and stitches pages 2-up on standard A4 to save 50% paper.">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- PDF.js for in-browser rendering & line detection -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- pdf-lib for in-browser PDF cropping and stitching -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body class="theme-dark">
+    <!-- Main Application Wrapper -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">📄✂️</div>
+                <div class="logo-text">
+                    <h1>Bilingual Exam PDF Splitter <span class="badge badge-accent">2-Up Booklet</span></h1>
+                    <p class="subtitle">100% In-Browser Private Processing • Zero Uploads • Saves 50% Paper</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="paper-saved-chip" id="paperSavedBadge">
+                    <span class="chip-icon">🌱</span>
+                    <span class="chip-text" id="totalSavedText">0 Sheets Saved</span>
+                </div>
+                <button class="btn btn-icon" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+                    <span id="themeIcon">☀️</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <main class="app-main">
+
+            <!-- Left Column: Upload & Configuration -->
+            <section class="panel panel-left">
+                
+                <!-- Drag and Drop Dropzone -->
+                <div class="card dropzone-card" id="dropzone">
+                    <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                    <div class="dropzone-content">
+                        <div class="drop-icon">📥</div>
+                        <h3>Drag & Drop Bilingual Exam PDFs Here</h3>
+                        <p class="drop-hint">or <button type="button" class="btn btn-sm btn-outline" id="browseBtn">Browse Files</button></p>
+                        <span class="drop-meta">Processes 100% in your browser • Files never leave your computer</span>
+                    </div>
+                </div>
+
+                <!-- Uploaded Files Queue -->
+                <div class="card queue-card" id="queueCard" style="display: none;">
+                    <div class="card-header">
+                        <h4>Files Queue (<span id="queueCount">0</span>)</h4>
+                        <button type="button" class="btn btn-xs btn-text text-danger" id="clearQueueBtn">Clear All</button>
+                    </div>
+                    <div class="file-queue-list" id="fileQueueList">
+                        <!-- Dynamic file items -->
+                    </div>
+                </div>
+
+                <!-- Processing Configuration Card -->
+                <div class="card config-card">
+                    <div class="card-header">
+                        <h4>⚙️ Processing Settings</h4>
+                        <span class="badge badge-pill">Client-Side Engine</span>
+                    </div>
+                    
+                    <div class="config-grid">
+                        
+                        <!-- Feature 1: Output Layout Mode -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span>📖 Output Layout</span>
+                                <span class="help-tooltip" title="2-Up stitches consecutive pages (1+2, 3+4) side-by-side on A4 to save 50% paper">ℹ️</span>
+                            </label>
+                            <div class="radio-toggle-group">
+                                <label class="radio-toggle">
+                                    <input type="radio" name="layoutMode" value="2up" checked>
+                                    <span class="toggle-btn">2-Up Booklet (1+2, 3+4...)</span>
+                                </label>
+                                <label class="radio-toggle">
+                                    <input type="radio" name="layoutMode" value="single">
+                                    <span class="toggle-btn">Single-Column (Half-width)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Feature 2: Column Selection -->
+                        <div class="form-group">
+                            <label class="form-label">🌐 Column / Language to Extract</label>
+                            <select id="sideSelect" class="form-select">
+                                <option value="left" selected>🇮🇳 Hindi Questions (Left Column)</option>
+                                <option value="right">🇬🇧 English Questions (Right Column)</option>
+                                <option value="both">⚡ Dual Mode (Extract Both Separately)</option>
+                            </select>
+                        </div>
+
+                        <!-- Feature 3: Page Skipping & Cover Handling -->
+                        <div class="form-group">
+                            <label class="form-label">📑 Cover & Page Filtering</label>
+                            <div class="checkbox-wrapper">
+                                <label class="custom-checkbox">
+                                    <input type="checkbox" id="skipCoverCheckbox">
+                                    <span class="checkbox-box"></span>
+                                    <span>Skip Instructions Cover (Page 1)</span>
+                                </label>
+                            </div>
+                            <div class="custom-pages-input-row">
+                                <input type="text" id="customSkipInput" class="form-input" placeholder="Custom skip (e.g. 0, 1 or leave blank)">
+                            </div>
+                        </div>
+
+                        <!-- Feature 4: Central Divider Line Styling -->
+                        <div class="form-group">
+                            <label class="form-label">📐 Booklet Central Divider</label>
+                            <div class="checkbox-wrapper">
+                                <label class="custom-checkbox">
+                                    <input type="checkbox" id="drawLineCheckbox" checked>
+                                    <span class="checkbox-box"></span>
+                                    <span>Draw subtle dividing line between stitched halves</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Feature 5: Divider Offset Adjustment -->
+                        <div class="form-group">
+                            <div class="slider-header">
+                                <label class="form-label">✂️ Divider Cut Offset (Fine-Tuning)</label>
+                                <span class="slider-value" id="offsetValueDisplay">0 pt</span>
+                            </div>
+                            <input type="range" id="offsetSlider" min="-30" max="30" step="0.5" value="0" class="form-range">
+                            <div class="slider-ticks">
+                                <span>-30pt (Left)</span>
+                                <span>Auto Line (0)</span>
+                                <span>+30pt (Right)</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Process Action Button -->
+                    <div class="action-footer">
+                        <button type="button" class="btn btn-primary btn-lg btn-block" id="processBtn" disabled>
+                            <span class="btn-icon">⚡</span> Start In-Browser Processing
+                        </button>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Right Column: Interactive Preview, Progress & Results -->
+            <section class="panel panel-right">
+
+                <!-- Live Preview Pane -->
+                <div class="card preview-card">
+                    <div class="card-header">
+                        <div class="header-title-row">
+                            <h4>🔍 Live Page & Divider Inspector</h4>
+                            <span class="badge" id="previewPageIndicator">No PDF selected</span>
+                        </div>
+                        <div class="preview-actions">
+                            <button type="button" class="btn btn-xs btn-outline" id="prevPageBtn" disabled>◀ Prev</button>
+                            <input type="number" id="previewPageInput" min="1" value="1" class="form-input-inline" disabled>
+                            <button type="button" class="btn btn-xs btn-outline" id="nextPageBtn" disabled>Next ▶</button>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Preview Container with Interactive Cut Line -->
+                    <div class="preview-stage" id="previewStage">
+                        <div class="preview-placeholder" id="previewPlaceholder">
+                            <div class="placeholder-icon">📑</div>
+                            <p>Upload a bilingual exam PDF to inspect detected cut lines in real-time</p>
+                        </div>
+                        <div class="preview-viewport" id="previewViewport" style="display: none;">
+                            <canvas id="previewCanvas"></canvas>
+                            <!-- Visual Overlaid Divider Line -->
+                            <div class="divider-overlay-line" id="dividerOverlayLine">
+                                <div class="divider-handle">✂️ CUT</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-footer" id="previewFooter" style="display: none;">
+                        <span id="previewStats">Detected line: 298.5 pt (50.1%)</span>
+                        <span class="badge badge-success">✓ 10-Slice Line Lock</span>
+                    </div>
+                </div>
+
+                <!-- Real-Time Progress Card -->
+                <div class="card progress-card" id="progressCard" style="display: none;">
+                    <div class="card-header">
+                        <h4>⏳ Processing Exam Booklets In-Browser...</h4>
+                        <span class="spinner"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-status-text" id="progressStatusText">Extracting Hindi questions & stitching 2-up...</div>
+                </div>
+
+                <!-- Results & Instant Viewer Section -->
+                <div class="card results-card" id="resultsCard" style="display: none;">
+                    <div class="card-header">
+                        <h4>🎉 Processed Booklets Ready!</h4>
+                        <button type="button" class="btn btn-sm btn-outline" id="batchZipBtn">📦 Download All</button>
+                    </div>
+
+                    <!-- Results List -->
+                    <div class="results-list" id="resultsList">
+                        <!-- Dynamic Result Items -->
+                    </div>
+
+                    <!-- In-Browser PDF Viewer Embed -->
+                    <div class="embedded-pdf-container" id="pdfViewerContainer" style="display: none;">
+                        <div class="viewer-header">
+                            <span id="viewerTitle">Viewing: output.pdf</span>
+                            <button type="button" class="btn btn-xs btn-outline" id="closeViewerBtn">✕ Close Viewer</button>
+                        </div>
+                        <iframe id="pdfViewerFrame" class="pdf-viewer-frame" src=""></iframe>
+                    </div>
+                </div>
+
+                <!-- Session History Drawer / Card -->
+                <div class="card history-card" id="historyCard">
+                    <div class="card-header">
+                        <h4>🕒 Session History</h4>
+                        <span class="badge" id="historyCount">0 Completed</span>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-history-text">No files processed in this session yet.</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Bilingual Exam PDF Splitter & 2-Up Stitcher • 100% In-Browser Client-Side Processing • Runs on GitHub Pages</span>
+        </footer>
+
+    </div>
+
+    <!-- Application Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>
