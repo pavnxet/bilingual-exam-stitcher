@@ -546,12 +546,17 @@ body {
 .preview-viewport {
     position: relative;
     display: inline-block;
+    max-width: 100%;
     max-height: 520px;
+    margin: 0 auto;
 }
 
+.preview-viewport canvas,
 .preview-viewport img {
     display: block;
+    max-width: 100%;
     max-height: 520px;
+    height: auto;
     width: auto;
     object-fit: contain;
 }
@@ -714,4 +719,159 @@ body {
     font-size: 0.78rem;
     color: var(--text-muted);
     padding: 10px 0;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints: Tablets, Phones, and Small Screens
+   ========================================================================== */
+
+/* Tablet & Medium Screens (<= 1024px) */
+@media (max-width: 1024px) {
+    .app-container {
+        padding: 16px 14px;
+        gap: 16px;
+    }
+
+    .app-main {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .preview-card {
+        min-height: auto;
+    }
+
+    .preview-stage {
+        min-height: 320px;
+    }
+}
+
+/* Mobile Devices & Phones (<= 640px) */
+@media (max-width: 640px) {
+    .app-container {
+        padding: 10px 8px;
+        gap: 12px;
+    }
+
+    .app-header {
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .header-left {
+        gap: 10px;
+    }
+
+    .logo-icon {
+        font-size: 1.6rem;
+        padding: 6px 10px;
+    }
+
+    .logo-text h1 {
+        font-size: 1.1rem;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .header-right {
+        justify-content: space-between;
+        width: 100%;
+        border-top: 1px solid var(--border-color);
+        padding-top: 8px;
+    }
+
+    .card {
+        padding: 14px 12px;
+        gap: 12px;
+    }
+
+    .dropzone-card {
+        padding: 24px 12px;
+    }
+
+    .drop-icon {
+        font-size: 2rem;
+        margin-bottom: 6px;
+    }
+
+    .dropzone-content h3 {
+        font-size: 0.95rem;
+    }
+
+    .preview-stage {
+        min-height: 250px;
+    }
+
+    .preview-viewport {
+        max-height: 380px;
+    }
+
+    .preview-viewport canvas,
+    .preview-viewport img {
+        max-height: 380px;
+    }
+
+    .preview-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .result-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .result-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .result-actions .btn {
+        width: 100%;
+        min-height: 40px;
+        font-size: 0.85rem;
+    }
+
+    .btn-lg {
+        padding: 14px 16px;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+
+    .pdf-viewer-frame {
+        height: 360px;
+    }
+}
+
+/* Extra Small Phones (<= 440px) */
+@media (max-width: 440px) {
+    .radio-toggle-group {
+        grid-template-columns: 1fr;
+    }
+
+    .slider-ticks {
+        font-size: 0.65rem;
+    }
+
+    .header-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .card-header .btn {
+        align-self: flex-end;
+    }
 }
